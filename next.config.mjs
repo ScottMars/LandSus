@@ -27,11 +27,29 @@ const nextConfig = {
         hostname: "**",
       },
     ],
+    minimumCacheTTL: 60,
+    disableStaticImages: false,
   },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
+    turbotrace: {
+      memoryLimit: 4 * 1024, // 4GB
+    },
+  },
+  webpack: (config, { isServer }) => {
+    // Отключаем минимизацию CSS в режиме разработки
+    if (process.env.NODE_ENV !== 'production') {
+      config.optimization.minimizer = config.optimization.minimizer.filter(
+        (minimizer) => minimizer.constructor.name !== 'CssMinimizerPlugin'
+      );
+    }
+
+    // Оптимизация для ограниченной памяти
+    config.optimization.minimize = process.env.NODE_ENV === 'production';
+
+    return config;
   },
 }
 
